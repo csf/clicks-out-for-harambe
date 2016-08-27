@@ -14,6 +14,7 @@ use messages::{MainLoopMsg,DisplayMsg};
 
 fn main() {
     initscr();
+    noecho();
     refresh();
 
     // Spawn the display processing thread
