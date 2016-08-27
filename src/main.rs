@@ -8,7 +8,6 @@ use ncurses::*;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
-use std::sync::mpsc::Receiver;
 use display::*;
 use input_handling::{input_handler};
 use messages::{MainLoopMsg,DisplayMsg};
@@ -24,11 +23,21 @@ fn main() {
     });
    
     //test
-    disp_tx.send(DisplayMsg::Time("24:00".to_string())).unwrap();
-    disp_tx.send(DisplayMsg::Splash).unwrap();
-    thread::sleep(Duration::from_millis(5000));
+    clear();
+
+    // Main intro
     disp_tx.send(DisplayMsg::MainIntro).unwrap();
    
+    thread::sleep(Duration::from_millis(4000));
+    
+    getch();
+
+    disp_tx.send(DisplayMsg::Tutorial).unwrap();
+
+    getch();
+
+    disp_tx.send(DisplayMsg::InitialScreen(1440)).unwrap();
+    
     let (input_tx, input_rx) = channel();
     thread::spawn(move|| {
         input_handler(input_tx);
@@ -36,6 +45,8 @@ fn main() {
 
     // wait for any key to terminate
     loop {
+        //update_game_time();
+
         match input_rx.recv().unwrap() {
             MainLoopMsg::Quit => break,
         }

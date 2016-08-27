@@ -7,18 +7,14 @@ use std::time::Duration;
 use ncurses::*;
 use messages::DisplayMsg;
 
-fn update_display() {
-    mvprintw(5,0,"Updating display example");
-}
-
 fn typewriter(y: i32, x: i32, message: &str) {
     mv(y,x);
     for c in message.chars() {
         addch(c as u64);
-        thread::sleep(Duration::from_millis(80));
+        thread::sleep(Duration::from_millis(62));
         refresh();
     }
-    thread::sleep(Duration::from_millis(200));
+    thread::sleep(Duration::from_millis(240));
 }
 
 fn main_intro() {
@@ -26,36 +22,54 @@ fn main_intro() {
     typewriter(2,0, "The year is 2016.");
     typewriter(3,0, "An election year.");
     typewriter(4,0, "The country is a cauldron of division, social unrest, memes, and internet tripe.");
-    typewriter(5,0, "The entire media scrambles for ad revenue, uncertain whether to prop up a dying business model or reinvent it.");
+    thread::sleep(Duration::from_millis(500));
+    typewriter(6,0, "The media industry scrambles for ad revenue, uncertain whether to prop up a dying business model or reinvent it.");
 
-    typewriter(8,0, "The only job you could find during the credit crisis was an unpaid internship at PooSprinkler,");
-    typewriter(9,0, "a clickbait farm trying to claim a chunk of the attention-stealing cesspool.");
-    typewriter(10,0, "You've now climbed to editor-in-chief, with only a meager budget at your disposal for content.");
+    typewriter(7,0, "The only gig you could find during the credit crisis: an unpaid internship at PooSprinkler,");
+    typewriter(8,0, "a clickbait site turning the grist of listicles into pennies of ad revenue.");
+    typewriter(10,0, "Through years of toil in the content mines, you've become editor-in-chief, with a meager content budget at your disposal.");
 
-    typewriter(11,0, "And then...tragedy strikes.");
-    typewriter(12,0, "A noble beast is taken from his prime.");
-    typewriter(13,0, "Duty calls...");
-    typewriter(14,0, "Only you can capitalize on this with your dark arts of clickbait...to raise money for the zoo...");
-    typewriter(16,0, "It's time to get...");
-    thread::sleep(Duration::from_millis(1500));
-    typewriter(17,0, "Clicks Out for Harambe.");
+    typewriter(12,0, "And then...tragedy strikes our nation.");
+    thread::sleep(Duration::from_millis(500));
+    typewriter(13,0, "A noble beast is taken from his prime.");
+    thread::sleep(Duration::from_millis(500));
+    typewriter(14,0, "Duty calls...");
+    typewriter(15,0, "Only your mastery of the dark arts of clickbait can save your site from irrelevance...");
+    thread::sleep(Duration::from_millis(500));
+    typewriter(17,0, "It's time to get...");
+    thread::sleep(Duration::from_millis(2500));
+    clear();
+    splash();
 }
 
 pub fn process_message(rx: Receiver<DisplayMsg>) {
 
     loop {
         match rx.recv().unwrap() {
-            DisplayMsg::Time(s) => { mvprintw(1,75,&s);},
-            DisplayMsg::UpdateDisplay => update_display(),
-            DisplayMsg::Splash => splash(),
             DisplayMsg::MainIntro => main_intro(),
-            DisplayMsg::EndThread => break,
+            DisplayMsg::Tutorial => tutorial(),
+            DisplayMsg::InitialScreen(time) => { clear(); update_screen(time);},
+            //DisplayMsg::EndThread => break,
         };
         refresh();
     }
 }
 
+
+
 fn splash() {
     mvprintw(0,0,"Clicks Out For Harambe!!!");
 }
 
+fn tutorial() {
+    clear();
+    mvprintw(0,0, "Tutorial placeholder");
+}
+
+fn draw_time(time: u64) {
+    mvprintw(0,75,&format!("{:?}",time));
+}
+
+fn update_screen(time: u64) {
+    draw_time(time);
+}
