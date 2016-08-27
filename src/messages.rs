@@ -6,6 +6,7 @@ pub enum MainLoopMsg {
 pub enum DisplayMsg {
     Time(String),
     UpdateDisplay,
+    MainIntro,
     Splash,
     EndThread,
 }
