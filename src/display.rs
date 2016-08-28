@@ -92,6 +92,8 @@ pub fn process_message(rx: Receiver<DisplayMsg>) {
                 update_screen(state);
             },
             DisplayMsg::UpdateScreen(state) => {
+                clear();
+                refresh();
                 update_screen(state);
             },
             DisplayMsg::AnyKeyPause => { 
@@ -120,7 +122,9 @@ fn draw_budget(budget: f64) {
 }
 
 fn draw_time(time: u64) {
-    mvprintw(0,75,&format!("{:?}",time));
+    let hours = time / 60;
+    let minutes = time - (hours * 60);
+    mvprintw(0,59,&format!("Time Remaining: {:02}:{:02}",hours,minutes));
 }
 
 fn draw_stories(stories: Vec<Story>) {

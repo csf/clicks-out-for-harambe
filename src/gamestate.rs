@@ -14,7 +14,7 @@ pub struct Story {
 
 impl State {
     pub fn new() -> State {
-        State { seconds_remaining: 2400, budget: 10_000.0, story_queue: Vec::new(), }
+        State { seconds_remaining: 1440, budget: 10_000.0, story_queue: Vec::new(), }
     }
 
     pub fn tick(&mut self) {
