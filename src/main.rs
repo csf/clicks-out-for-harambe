@@ -4,12 +4,16 @@ mod messages;
 mod display;
 mod input_handling;
 
+mod gamestate;
+
 use ncurses::*;
 use std::sync::mpsc::channel;
 use std::thread;
 use display::*;
 use input_handling::{input_handler};
 use messages::{MainLoopMsg,DisplayMsg};
+
+use gamestate::State;
 
 fn main() {
     initscr();
@@ -22,7 +26,10 @@ fn main() {
     thread::spawn(move|| {
         process_message(disp_rx);
     });
-   
+
+    // set up game state
+    let mut gamestate = State::new();
+
     // Main intro
     disp_tx.send(DisplayMsg::MainIntro).unwrap();
    
@@ -36,7 +43,7 @@ fn main() {
     
     getch();
 
-    disp_tx.send(DisplayMsg::InitialScreen(1440)).unwrap();
+    disp_tx.send(DisplayMsg::InitialScreen(gamestate)).unwrap();
     
     let (input_tx, input_rx) = channel();
     thread::spawn(move|| {

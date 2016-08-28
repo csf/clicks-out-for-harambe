@@ -1,3 +1,4 @@
+use gamestate::State;
 
 pub enum MainLoopMsg {
     Quit,
@@ -6,7 +7,7 @@ pub enum MainLoopMsg {
 pub enum DisplayMsg {
     MainIntro,
     Tutorial,
-    InitialScreen(u64),
+    InitialScreen(State),
     AnyKey,
     AnyKeyPause,
 }

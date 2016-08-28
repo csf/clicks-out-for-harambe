@@ -3,5 +3,9 @@ name = "clicks-out-for-harambe"
 version = "0.1.0"
 authors = ["Christopher Finn <chris.finn@gmail.com>"]
 
+[features]
+default = []
+skip_intro = []
+
 [dependencies]
 ncurses = "5.80.0"
