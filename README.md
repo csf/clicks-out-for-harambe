@@ -43,3 +43,11 @@ To build and run with the intro text skipped, use:
 cargo build --release --features=skip-intro
 ```  
 
+## Vision
+The game mechanic for Clicks Out for Harambe, which won't be fully realized during the weekend Ludum Dare Jam, is to use a suitable machine learning algorithm against a corpus of actual clickbait headlines to model the likeihood that various demographic segments of a non-player character population would click on a given link, which the player then probes by publishing various stories with features that generate clicks, with time and resource constraints applied. The human player is trying to find an optimal strategy for published story features against these overlapping demographic models.
+
+The same game mechanic might also work for a game based on a presidential election, where as a candidate or campaign manager, the player tries to find an optimal messaging strategy for soundbites.
+
+The fun part, from a game design perspective, is trying to understand how to derive text features that result in different models for different populations.
+
+I picked Rust as a programming language, not because it is particularly well-suited to game development, but because I like it, and it has some good libraries I want an excuse to explore in terms of visualization, machine learning, text processing, and (eventually) audio.
