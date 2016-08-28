@@ -7,13 +7,13 @@ mod input_handling;
 use ncurses::*;
 use std::sync::mpsc::channel;
 use std::thread;
-use std::time::Duration;
 use display::*;
 use input_handling::{input_handler};
 use messages::{MainLoopMsg,DisplayMsg};
 
 fn main() {
     initscr();
+    clear();
     noecho();
     refresh();
 
@@ -23,18 +23,17 @@ fn main() {
         process_message(disp_rx);
     });
    
-    //test
-    clear();
-
     // Main intro
     disp_tx.send(DisplayMsg::MainIntro).unwrap();
    
-    thread::sleep(Duration::from_millis(4000));
-    
+    disp_tx.send(DisplayMsg::AnyKeyPause).unwrap();
+   
     getch();
 
     disp_tx.send(DisplayMsg::Tutorial).unwrap();
-
+    
+    disp_tx.send(DisplayMsg::AnyKeyPause).unwrap();
+    
     getch();
 
     disp_tx.send(DisplayMsg::InitialScreen(1440)).unwrap();
