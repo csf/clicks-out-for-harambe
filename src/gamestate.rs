@@ -5,14 +5,18 @@ pub struct State {
 }
 
 pub struct Story {
-    headline: String,
+    pub headline: String,
     words: u64,
-    revenue: f64,
+    pub revenue: f64,
 }
 
 impl State {
     pub fn new() -> State {
         State { seconds_remaining: 2400, budget: 10_000.0, story_queue: Vec::new(), }
+    }
+
+    pub fn publish(&mut self, story: Story) {
+        self.story_queue.push(story);
     }
 }
 

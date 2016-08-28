@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use ncurses::*;
 use messages::DisplayMsg;
-use gamestate::State;
+use gamestate::{State,Story};
 
 #[cfg(feature="skip_intro")]
 const KEY_DELAY: u64 = 0;
@@ -121,7 +121,29 @@ fn draw_time(time: u64) {
     mvprintw(0,75,&format!("{:?}",time));
 }
 
+fn draw_stories(stories: Vec<Story>) {
+    let mut queue_line = 2;
+    attron(A_BOLD());
+    mvprintw(queue_line,0,"Your Top Headlines");
+    attroff(A_BOLD());
+    queue_line += 1;
+    attron(A_UNDERLINE());
+    mvprintw(queue_line,0," Pos   Revenue    Headline");
+    attroff(A_UNDERLINE());
+    queue_line += 1;
+
+    let mut story_pos = 1;
+    for s in stories {
+        queue_line += 1;
+        story_pos += 1;
+        mvprintw(queue_line,0,&format!("{:>5} {:>7.*}     {}", story_pos, 2, s.revenue, s.headline));
+    }
+
+
+}   
+
 fn update_screen(state: State) {
     draw_budget(state.budget);
+    draw_stories(state.story_queue);
     draw_time(state.seconds_remaining);
 }

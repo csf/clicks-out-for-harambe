@@ -13,7 +13,7 @@ use display::*;
 use input_handling::{input_handler};
 use messages::{MainLoopMsg,DisplayMsg};
 
-use gamestate::State;
+use gamestate::{State,Story};
 
 fn main() {
     initscr();
@@ -29,6 +29,12 @@ fn main() {
 
     // set up game state
     let mut gamestate = State::new();
+
+    let story = Story::new("Gorilla Isn't Mist".to_string(), 525);
+    gamestate.publish(story);
+    let story = Story::new("A Nation Mourns".to_string(), 525);
+    
+    gamestate.publish(story);
 
     // Main intro
     disp_tx.send(DisplayMsg::MainIntro).unwrap();
