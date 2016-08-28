@@ -26,3 +26,20 @@ A rise goes up from the internet: Clicks out for Harambe!
 * [Rust](https://rust-lang.org/)
 * [ncurses-rs](https://github.com/jeaye/ncurses-rs)
 * Currently only builds for Mac OS X.
+
+## Build and Run
+To build and run:
+
+```
+git clone https://github.com/csf/clicks-out-for-harambe
+cd clicks-out-for-harambe
+cargo build --release
+./target/release/clicks-out-for-harambe
+```
+
+To build and run with the intro text skipped, use:
+
+```
+cargo build --release --features=skip-intro
+```  
+
