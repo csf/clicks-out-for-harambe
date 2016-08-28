@@ -1,6 +1,7 @@
 use gamestate::State;
 
 pub enum MainLoopMsg {
+    Tick,
     Quit,
 }
 
@@ -8,6 +9,6 @@ pub enum DisplayMsg {
     MainIntro,
     Tutorial,
     InitialScreen(State),
-    AnyKey,
+    UpdateScreen(State),
     AnyKeyPause,
 }

@@ -7,13 +7,22 @@ mod input_handling;
 mod gamestate;
 
 use ncurses::*;
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{channel, Sender};
 use std::thread;
+use std::time::Duration;
+
 use display::*;
 use input_handling::{input_handler};
 use messages::{MainLoopMsg,DisplayMsg};
 
 use gamestate::{State,Story};
+
+fn countdown(tx: Sender<MainLoopMsg>) {
+    loop {
+        thread::sleep(Duration::from_millis(1000));
+        tx.send(MainLoopMsg::Tick).unwrap();
+    }
+}
 
 fn main() {
     initscr();
@@ -30,6 +39,7 @@ fn main() {
     // set up game state
     let mut gamestate = State::new();
 
+    // some test stories
     let story = Story::new("Gorilla Isn't Mist".to_string(), 525);
     gamestate.publish(story);
     let story = Story::new("A Nation Mourns".to_string(), 525);
@@ -49,18 +59,31 @@ fn main() {
     
     getch();
 
-    disp_tx.send(DisplayMsg::InitialScreen(gamestate)).unwrap();
+    disp_tx.send(DisplayMsg::InitialScreen(gamestate.clone())).unwrap();
     
-    let (input_tx, input_rx) = channel();
+    let (mainloop_tx, mainloop_rx) = channel();
+    
+    // Create 
+    let t1 = mainloop_tx.clone();
+    let t2 = mainloop_tx.clone();
+
+    // spawn a thread to handle input
     thread::spawn(move|| {
-        input_handler(input_tx);
+        input_handler(t1);
     });
 
-    // wait for any key to terminate
-    loop {
-        //update_game_time();
+    // spawn a thread to handle the game timer 
+    thread::spawn(move|| {
+        countdown(t2);
+    });
 
-        match input_rx.recv().unwrap() {
+    // Advance one clock tick, update game state, and handle any input events.
+    loop {
+        match mainloop_rx.recv().unwrap() {
+            MainLoopMsg::Tick => {
+                gamestate.tick();
+                disp_tx.send(DisplayMsg::UpdateScreen(gamestate.clone())).unwrap();
+            },
             MainLoopMsg::Quit => break,
         }
     }

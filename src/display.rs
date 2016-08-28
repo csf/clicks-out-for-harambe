@@ -91,7 +91,9 @@ pub fn process_message(rx: Receiver<DisplayMsg>) {
                 refresh();
                 update_screen(state);
             },
-            DisplayMsg::AnyKey => anykey(),
+            DisplayMsg::UpdateScreen(state) => {
+                update_screen(state);
+            },
             DisplayMsg::AnyKeyPause => { 
                                         thread::sleep(Duration::from_millis(2000));
                                         anykey();
@@ -114,7 +116,7 @@ fn tutorial() {
 }
 
 fn draw_budget(budget: f64) {
-    mvprintw(0,0,&format!("Budget: {:.*}", 2, budget));
+    mvprintw(0,0,&format!("Budget: ${:.*}", 2, budget));
 }
 
 fn draw_time(time: u64) {
@@ -132,7 +134,7 @@ fn draw_stories(stories: Vec<Story>) {
     attroff(A_UNDERLINE());
     queue_line += 1;
 
-    let mut story_pos = 1;
+    let mut story_pos = 0;
     for s in stories {
         queue_line += 1;
         story_pos += 1;

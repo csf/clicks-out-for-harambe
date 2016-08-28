@@ -8,4 +8,3 @@ pub fn input_handler(tx: Sender<MainLoopMsg>) {
     getch();
     tx.send(MainLoopMsg::Quit).unwrap();
 }
-
