@@ -134,7 +134,7 @@ fn draw_stories(stories: Vec<Story>) {
     attroff(A_BOLD());
     queue_line += 1;
     attron(A_UNDERLINE());
-    mvprintw(queue_line,0," Pos   Revenue    Headline");
+    mvprintw(queue_line,0," Pos   Revenue    Clicks    Headline");
     attroff(A_UNDERLINE());
     queue_line += 1;
 
@@ -142,7 +142,7 @@ fn draw_stories(stories: Vec<Story>) {
     for s in stories {
         queue_line += 1;
         story_pos += 1;
-        mvprintw(queue_line,0,&format!("{:>5} {:>7.*}     {}", story_pos, 2, s.revenue, s.headline));
+        mvprintw(queue_line,0,&format!("{:>5} {:>7.*}     {:>6}    {}", story_pos, 2, s.revenue, s.clicks, s.headline));
     }
 
 
