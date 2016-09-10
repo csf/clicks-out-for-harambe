@@ -2,8 +2,6 @@ extern crate ncurses;
 
 mod messages;
 mod display;
-mod input_handling;
-
 mod gamestate;
 
 use ncurses::*;
@@ -11,9 +9,7 @@ use std::sync::mpsc::{channel, Sender};
 use std::thread;
 use std::time::Duration;
 
-use display::*;
-use input_handling::{input_handler};
-use messages::{MainLoopMsg,DisplayMsg};
+use messages::*;
 
 use gamestate::{State,Story};
 
@@ -24,67 +20,70 @@ fn countdown(tx: Sender<MainLoopMsg>) {
     }
 }
 
-fn main() {
-    initscr();
-    clear();
-    noecho();
-    refresh();
-
-    // Spawn the display processing thread
-    let (disp_tx, disp_rx) = channel();
-    thread::spawn(move|| {
-        process_message(disp_rx);
-    });
-
-    // set up game state
-    let mut gamestate = State::new();
-
+fn init_test_gamestate(gamestate: &mut State) {
     // some test stories
     let story = Story::new("Gorilla Isn't Mist".to_string(), 525);
     gamestate.publish(story);
     let story = Story::new("A Nation Mourns".to_string(), 525);
     
     gamestate.publish(story);
+}
 
-    // Main intro
-    disp_tx.send(DisplayMsg::MainIntro).unwrap();
-   
-    disp_tx.send(DisplayMsg::AnyKeyPause).unwrap();
-   
-    getch();
+fn main() {
 
-    disp_tx.send(DisplayMsg::Tutorial).unwrap();
-    
-    disp_tx.send(DisplayMsg::AnyKeyPause).unwrap();
-    
-    getch();
+    // set up game state
+    let mut gamestate = State::new();
+    init_test_gamestate(&mut gamestate);
 
-    disp_tx.send(DisplayMsg::InitialScreen(gamestate.clone())).unwrap();
+    display::init_ncurses();
+
+    // Title sequence stuff
+    display::main_intro();
+    display::tutorial();
+
+    // we want to get full commands now, while updating display, so we need to use halfdelay+echo
+    display::change_input_mode();
+
+    // Paint the starting screen now
+    display::update_screen(&gamestate);
     
+    // spawn a thread to handle the game timer: this will refresh screen once a second 
     let (mainloop_tx, mainloop_rx) = channel();
-    
-    // Create 
-    let t1 = mainloop_tx.clone();
-    let t2 = mainloop_tx.clone();
-
-    // spawn a thread to handle input
     thread::spawn(move|| {
-        input_handler(t1);
+        countdown(mainloop_tx);
     });
 
-    // spawn a thread to handle the game timer 
-    thread::spawn(move|| {
-        countdown(t2);
-    });
-
-    // Advance one clock tick, update game state, and handle any input events.
+    // Check for keyboard input
+    // We keep current "draft" headline in gamestate so it can be retained and
+    // refreshed if tick occurs
     loop {
-        match mainloop_rx.recv().unwrap() {
-            MainLoopMsg::Tick => {
-                gamestate.tick();
-                disp_tx.send(DisplayMsg::UpdateScreen(gamestate.clone())).unwrap();
+        let ch = getch();
+        if ch !=ERR {
+            if ch != '\r' as i32 && ch != '\n' as i32 {
+                unsafe { gamestate.draft_headline.as_mut_vec().push(ch as u8); }
+            } else {
+                // update game state by publishing new story
+                let story = Story::new(gamestate.draft_headline.clone(), 423);
+                gamestate.publish(story);
+                gamestate.draft_headline = String::new();
+                display::update_screen(&gamestate);
+            }
+        }
+
+        // no typing, so channel check to see if it is time to refresh 
+        match mainloop_rx.try_recv() {
+            Ok(msg) => {
+                match msg {
+                    MainLoopMsg::Tick => {
+                        gamestate.tick();
+                        display::update_screen(&gamestate);
+                        if gamestate.seconds_remaining == 0 {
+                            break; // for now
+                        }
+                    },
+                }
             },
-            MainLoopMsg::Quit => break,
+            Err(_) => {},
         }
     }
 

@@ -3,6 +3,7 @@ pub struct State {
    pub seconds_remaining: u64,
    pub budget: f64,
    pub story_queue: Vec<Story>,
+   pub draft_headline: String,
 }
 
 #[derive(Clone)]
@@ -15,7 +16,8 @@ pub struct Story {
 
 impl State {
     pub fn new() -> State {
-        State { seconds_remaining: 1440, budget: 10_000.0, story_queue: Vec::new(), }
+        State { seconds_remaining: 1440, budget: 10_000.0, story_queue: Vec::new(), draft_headline:
+        String::new() }
     }
 
     pub fn tick(&mut self) {

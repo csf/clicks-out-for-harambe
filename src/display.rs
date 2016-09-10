@@ -1,11 +1,9 @@
 extern crate ncurses;
 
-use std::sync::mpsc::Receiver;
 use std::thread;
 use std::time::Duration;
 
 use ncurses::*;
-use messages::DisplayMsg;
 use gamestate::{State,Story};
 
 #[cfg(feature="skip_intro")]
@@ -40,13 +38,15 @@ fn typewriter(y: i32, x: i32, message: &str) {
     thread::sleep(Duration::from_millis(LINE_DELAY));
 }
 
-fn anykey() {
+fn anykey_pause() {
+    thread::sleep(Duration::from_millis(1000));
     mv(24,24);
     printw("Press any key to continue...");
     refresh();
+    getch();
 }
 
-fn main_intro() {
+pub fn main_intro() {
     clear();
     refresh();
     typewriter(1,0, "*ominous music plays*");
@@ -77,33 +77,19 @@ fn main_intro() {
     clear();
     refresh();
     splash();
-    thread::sleep(Duration::from_millis(4*DRAMA_DELAY));
+    anykey_pause();
 }
 
-pub fn process_message(rx: Receiver<DisplayMsg>) {
+pub fn init_ncurses() {
+    initscr();
+    clear();
+    noecho();
+    refresh();
+}
 
-    loop {
-        match rx.recv().unwrap() {
-            DisplayMsg::MainIntro => main_intro(),
-            DisplayMsg::Tutorial => tutorial(),
-            DisplayMsg::InitialScreen(state) => {
-                clear();
-                refresh();
-                update_screen(state);
-            },
-            DisplayMsg::UpdateScreen(state) => {
-                clear();
-                refresh();
-                update_screen(state);
-            },
-            DisplayMsg::AnyKeyPause => { 
-                                        thread::sleep(Duration::from_millis(2000));
-                                        anykey();
-            },
-            //DisplayMsg::EndThread => break,
-        };
-        refresh();
-    }
+pub fn change_input_mode() {
+    echo();
+    halfdelay(1);
 }
 
 fn splash() {
@@ -111,10 +97,12 @@ fn splash() {
     refresh();
 }
 
-fn tutorial() {
+pub fn tutorial() {
     clear();
     refresh();
     mvprintw(0,0, "Tutorial placeholder");
+    refresh();
+    anykey_pause();
 }
 
 fn draw_budget(budget: f64) {
@@ -127,7 +115,7 @@ fn draw_time(time: u64) {
     mvprintw(0,59,&format!("Time Remaining: {:02}:{:02}",hours,minutes));
 }
 
-fn draw_stories(stories: Vec<Story>) {
+fn draw_stories(stories: &Vec<Story>) {
     let mut queue_line = 2;
     attron(A_BOLD());
     mvprintw(queue_line,0,"Your Top Headlines");
@@ -148,8 +136,15 @@ fn draw_stories(stories: Vec<Story>) {
 
 }   
 
-fn update_screen(state: State) {
+fn draw_command_prompt(draft_headline: &String) {
+    mvprintw(24,0, &format!("New Headline: {}", &draft_headline));
+}
+
+pub fn update_screen(state: &State) {
+    clear();
+    refresh();
     draw_budget(state.budget);
-    draw_stories(state.story_queue);
+    draw_stories(&state.story_queue);
     draw_time(state.seconds_remaining);
+    draw_command_prompt(&state.draft_headline);
 }
