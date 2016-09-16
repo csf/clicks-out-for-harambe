@@ -2,6 +2,7 @@ extern crate ncurses;
 
 mod messages;
 mod display;
+mod feature;
 mod gamestate;
 
 use ncurses::*;

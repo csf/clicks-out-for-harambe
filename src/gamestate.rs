@@ -1,3 +1,5 @@
+use feature::{eval_features, FeatureVec};
+
 #[derive(Clone)]
 pub struct State {
    pub seconds_remaining: u64,
@@ -12,6 +14,7 @@ pub struct Story {
     words: u64,
     pub revenue: f64,
     pub clicks: u64,
+    features: FeatureVec,
 }
 
 impl State {
@@ -58,6 +61,7 @@ impl State {
 
 impl Story {
     pub fn new(headline: String, word_count: u64) -> Story {
-        Story { headline: headline, words: word_count, revenue: 0.0, clicks: 0, }
+        Story { headline: headline.clone(), words: word_count, revenue: 0.0, clicks: 0, features:
+            eval_features(headline) }
     }
 }
